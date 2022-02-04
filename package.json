@@ -1,0 +1,28 @@
+{
+  "name": "cache-manager-couchbase",
+  "author": "Davide Pellegatta <davide.pellegatta@gmail.com>",
+  "description": "Couchbase store for node-cache-manager",
+  "version": "2.1.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidepellegatta/node-cache-manager-couchbase.git"
+  },
+  "scripts": {
+    "prepublish": "npm prune",
+    "test": "jest --forceExit",
+    "test-cov": "jest --forceExit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "build": "rollup -c"
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "couchbase": "^3.2.4"
+  },
+  "devDependencies": {
+    "cache-manager": "^2.11.1",
+    "coveralls": "^3.0.9",
+    "jest": "^25.1.0",
+    "rollup": "^1.31.0"
+  }
+}
