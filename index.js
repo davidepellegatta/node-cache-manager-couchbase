@@ -39,7 +39,7 @@ class CouchbaseStore {
     }
     
 
-    async prepCouchbaseConnection() {
+    prepCouchbaseConnection() {
         var self = this;
 
         return Promise.try(() => {
