@@ -28,72 +28,41 @@ class CouchbaseStore {
         self.scope = args.scope;
         self.collection = args.collection;
         self.ttl = args.ttl;
-        self.clients = {
-            couchbaseBucket: null,
-            couchbaseCluster: null,
-            couchbaseCollection: null
-        };
-
         self.name = 'couchbase';
         self.isCacheableValue = args.isCacheableValue || (value => value !== undefined && value !== null);
     }
     
 
-    prepCouchbaseConnection() {
+    async prepCouchbaseConnection() {
         var self = this;
-
-        return Promise.try(() => {
-            return couchbase.connect(self.connectionString, self.connectionOptions);
-        }).then((cluster) => {
-            self.clients.couchbaseCluster = cluster;
-            return cluster.bucket(self.bucket);
-        }).then((bucket) => {
-            self.clients.couchbaseBucket = bucket; 
-            return self.prepCollectionAccess();
-        }).catch((err) => {
-            console.log(err);
-            throw err;
-        });
-    }
-
-
-
-    //next step, add here index creation
-    prepCollectionAccess() {
-        var self = this;
-        let collection;
-        
-        return Promise.try(() => {
-            //defining scope and collection, otherwise falling back on default one.
-
-            if (self.scope != null && self.scope !== 'undefined') {
-                if (self.collection != null && self.collection !== 'undefined') {
-                    collection = self.clients.couchbaseBucket
-                        .scope(self.scope)
-                        .collection(self.collection);
-                }
-            } else {
-                collection = self.clients.couchbaseBucket.defaultCollection();
+        self.clients= {
+            couchbaseBucket: null,
+            couchbaseCluster: null,
+            couchbaseCollection: null
+        };
+        self.clients.couchbaseCluster  = await couchbase.connect(self.connectionString, self.connectionOptions);
+        self.clients.couchbaseBucket= self.clients.couchbaseCluster.bucket(self.bucket);
+        if (self.scope != null && self.scope !== 'undefined') {
+            if (self.collection != null && self.collection !== 'undefined') {
+                self.clients.couchbaseCollection = self.clients.couchbaseBucket.scope(self.scope).collection(self.collection);
             }
-            
-            self.clients.couchbaseCollection = collection;
-            return collection;
-                
-        }).catch((err) => {
-            console.log(err);
-            throw err;
-        });
+        } else {
+            self.clients.couchbaseCollection = self.clients.couchbaseBucket.defaultCollection();
+        }
+        return self.clients.couchbaseCollection;
     }
+
 
     getCouchbaseCollection() {
         var self = this;
         return Promise.try(() => {
-            if (self.clients.couchbaseBucket && self.clients.couchbaseCollection) {
+            if (self.clients && self.clients.couchbaseBucket && self.clients.couchbaseCollection) {
                 console.log('using already open conn');
                 return self.clients.couchbaseCollection;
             } else {
                 console.log('creating a new conn');
-                return this.prepCouchbaseConnection();
+                const result =  this.prepCouchbaseConnection();
+                return result;
             }
         }).catch((err) => {
             console.log(err);
@@ -131,9 +100,10 @@ class CouchbaseStore {
         ttl = ttl * 60;
 
         couchbaseStore.getCouchbaseCollection()
-            .then((collection) => {
-                return collection.upsert(key, value, { expiry: ttl });
-            }).then((result) => cb(null, result))
+            .then((collection)  => {
+                 const result =  collection.upsert(key, value, { expiry: ttl });
+                 return result;
+            })
             .catch((err) => {
                 console.log(err);
                 cb(err);
