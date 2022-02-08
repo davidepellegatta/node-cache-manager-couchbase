@@ -17,20 +17,14 @@ Promise = require('bluebird');
    */
 const couchbaseStore = (...args) => {
 
-    //maybe some validation? let's see after the tests
-
-    console.log(`Starting CouchbaseStore for node-cache-manager with ${args}`)
-
     const globalOptions = args[0];
-
     let cluster = new couchbase.Cluster(globalOptions.connectionString, globalOptions.connectionOptions);
     let couchbaseBucket = cluster.bucket(globalOptions.bucket);
     let couchbaseCollection = null;
     let couchbaseBucketManager = null;
     let globalTtl = 0;
-    let isCacheableValue = (value) => (value => value !== undefined && value !== null);
+    let isCacheableValue = (value) => ((value !== null && value !== undefined) ? true : false);
     
-
     if (globalOptions.scope != null && globalOptions.scope !== 'undefined') {
         if (globalOptions.collection != null && globalOptions.collection !== 'undefined') {
             couchbaseCollection = couchbaseBucket.scope(globalOptions.scope).collection(globalOptions.collection);
@@ -41,13 +35,9 @@ const couchbaseStore = (...args) => {
 
     couchbaseBucketManager = cluster.buckets();
 
-
-    if (globalOptions.isCacheableValue != null && globalOptions.isCacheableValue !== 'undefined') {
-        isCacheableValue = (value => value !== undefined && value !== null);
-    }
-
     let self = {
-        name: 'couchbase'
+        name: 'couchbase',
+        options: globalOptions
     };
 
     self.getClient = () => {
@@ -105,6 +95,9 @@ const couchbaseStore = (...args) => {
                 return cb(null, result.content);
             })
             .catch((err) => {
+                if(err.message == 'document not found') {
+                    return cb(null, null);
+                }
                 return cb(err);
             });
     };
@@ -153,7 +146,7 @@ const couchbaseStore = (...args) => {
             })
         }
 
-        let bucketReplacement; 
+        let bucketReplacement = null;
 
         if (globalOptions.collection == null && globalOptions.collection === 'undefined') {
             bucketReplacement = `\`${globalOptions.bucket}\`.\`_default\`.\`_default\``;
@@ -183,8 +176,8 @@ const couchbaseStore = (...args) => {
             });
     };
 
-    self.ttl = (key, cb) => { 
-        
+    self.ttl = (key, cb) => {
+
         if (cb === undefined) {
             return new Promise(function (resolve, reject) {
                 self.ttl(key, function (err, result) {
@@ -197,13 +190,15 @@ const couchbaseStore = (...args) => {
             .then((result) => {
                 return (result.expiryTime - Math.floor(Date.now() / 1000));
             })
-            .then( (secondsToExpiration) => {
+            .then((secondsToExpiration) => {
                 return cb(null, secondsToExpiration);
             })
             .catch((err) => {
                 return cb(err);
             });
     };
+
+    return self;
 };
 
 const methods = {
