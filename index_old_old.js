@@ -1,7 +1,6 @@
 'use strict';
 
 const couchbase = require('couchbase');
-Promise = require('bluebird');
 
 /* configuration example.. see couchbase docs for more
    * {

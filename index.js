@@ -25,7 +25,7 @@ const couchbaseStore = (...args) => {
     let couchbaseBucket = cluster.bucket(args[0].bucket);
     let couchbaseCollection = null;
     let couchbaseBucketManager = null;
-    let ttl = 0;
+    let globalTtl = 0;
     let isCacheableValue = (value) => (value => value !== undefined && value !== null);
 
     if (args[0].scope != null && args[0].scope !== 'undefined') {
@@ -78,14 +78,33 @@ const couchbaseStore = (...args) => {
             return cb(new Error(`"${value}" is not a cacheable value`));
         }
 
-        let ttl = (options.ttl || options.ttl === 0) ? options.ttl : storeOptions.ttl;
+        let ttl = (options.ttl || options.ttl === 0) ? options.ttl : globalTtl;
         ttl = ttl * 60;
 
         couchbaseCollection.upsert(key, value, { expiry: ttl }, cb);
     };
 
     self.get = (key, options, cb) => {
+        if (typeof options === 'function') {
+            cb = options;
+        }
 
+        if (cb === undefined) {
+            return new Promise(function (resolve, reject) {
+                couchbaseCollection.get(key, options, function (err, result) {
+                    err ? reject(err) : resolve(result)
+                })
+            })
+        }
+        
+        couchbaseCollection
+            .get(key)
+            .then((result) => {
+                return cb && cb(null, result.content);
+            })
+            .catch((err) => {
+                return cb && cb(err);
+            });
     };
 
     self.del = (key, options, cb) => {
@@ -96,9 +115,9 @@ const couchbaseStore = (...args) => {
 
     };
 
-    self.keys = (pattern, cb) => {};
+    self.keys = (pattern, cb) => { };
 
-    self.ttl = (key, cb) => {};
+    self.ttl = (key, cb) => { };
 
     return self;
 };
