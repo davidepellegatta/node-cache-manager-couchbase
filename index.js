@@ -21,16 +21,19 @@ const couchbaseStore = (...args) => {
 
     console.log(`Starting CouchbaseStore for node-cache-manager with ${args}`)
 
-    let cluster = new couchbase.Cluster(args[0].connectionString, args[0].connectionOptions);
-    let couchbaseBucket = cluster.bucket(args[0].bucket);
+    const globalOptions = args[0];
+
+    let cluster = new couchbase.Cluster(globalOptions.connectionString, globalOptions.connectionOptions);
+    let couchbaseBucket = cluster.bucket(globalOptions.bucket);
     let couchbaseCollection = null;
     let couchbaseBucketManager = null;
     let globalTtl = 0;
     let isCacheableValue = (value) => (value => value !== undefined && value !== null);
+    
 
-    if (args[0].scope != null && args[0].scope !== 'undefined') {
-        if (args[0].collection != null && args[0].collection !== 'undefined') {
-            couchbaseCollection = couchbaseBucket.scope(args[0].scope).collection(args[0].collection);
+    if (globalOptions.scope != null && globalOptions.scope !== 'undefined') {
+        if (globalOptions.collection != null && globalOptions.collection !== 'undefined') {
+            couchbaseCollection = couchbaseBucket.scope(globalOptions.scope).collection(globalOptions.collection);
         }
     } else {
         couchbaseCollection = couchbaseBucket.defaultCollection();
@@ -39,7 +42,7 @@ const couchbaseStore = (...args) => {
     couchbaseBucketManager = cluster.buckets();
 
 
-    if (args[0].isCacheableValue != null && args[0].isCacheableValue !== 'undefined') {
+    if (globalOptions.isCacheableValue != null && globalOptions.isCacheableValue !== 'undefined') {
         isCacheableValue = (value => value !== undefined && value !== null);
     }
 
@@ -96,9 +99,8 @@ const couchbaseStore = (...args) => {
                 })
             })
         }
-        
-        couchbaseCollection
-            .get(key)
+
+        couchbaseCollection.get(key)
             .then((result) => {
                 return cb(null, result.content);
             })
@@ -108,18 +110,100 @@ const couchbaseStore = (...args) => {
     };
 
     self.del = (key, options, cb) => {
+        if (typeof options === 'function') {
+            cb = options;
+        }
 
+        if (cb === undefined) {
+            return new Promise(function (resolve, reject) {
+                self.del(key, options, function (err, result) {
+                    err ? reject(err) : resolve(result)
+                })
+            })
+        }
+
+        couchbaseCollection.remove(key, cb);
     };
 
-    self.reset = () => {
+    self.reset = (cb) => {
 
+        if (cb === undefined) {
+            return new Promise(function (resolve, reject) {
+                self.reset(key, options, function (err, result) {
+                    err ? reject(err) : resolve(result)
+                })
+            })
+        }
+
+        return couchbaseBucketManagerbucketMgr.flushBucket(storeArgs.bucket, cb);
     };
 
-    self.keys = (pattern, cb) => { };
+    self.keys = (pattern, cb) => {
 
-    self.ttl = (key, cb) => { };
+        if (typeof pattern === 'function') {
+            cb = pattern;
+            pattern = '*';
+        }
 
-    return self;
+        if (cb === undefined) {
+            return new Promise(function (resolve, reject) {
+                self.keys(pattern, function (err, result) {
+                    err ? reject(err) : resolve(result)
+                })
+            })
+        }
+
+        let bucketReplacement; 
+
+        if (globalOptions.collection == null && globalOptions.collection === 'undefined') {
+            bucketReplacement = `\`${globalOptions.bucket}\`.\`_default\`.\`_default\``;
+        } else {
+            bucketReplacement = `\`${globalOptions.bucket}\`.\`${globalOptions.scope}\`.\`${globalOptions.collection}\``;
+        }
+
+        const query = `
+            SELECT RAW meta().id
+            FROM ${bucketReplacement} 
+            WHERE REGEXP_CONTAINS(META().id, $PATTERN)
+          `;
+
+        const optionsQuery = {
+            parameters: {
+                PATTERN: pattern
+            }
+        }
+
+
+        cluster.query(query, optionsQuery)
+            .then((result) => {
+                return cb(null, result.rows);
+            })
+            .catch((err) => {
+                return cb(err);
+            });
+    };
+
+    self.ttl = (key, cb) => { 
+        
+        if (cb === undefined) {
+            return new Promise(function (resolve, reject) {
+                self.ttl(key, function (err, result) {
+                    err ? reject(err) : resolve(result)
+                })
+            })
+        }
+
+        couchbaseCollection.get(key)
+            .then((result) => {
+                return (result.expiryTime - Math.floor(Date.now() / 1000));
+            })
+            .then( (secondsToExpiration) => {
+                return cb(null, secondsToExpiration);
+            })
+            .catch((err) => {
+                return cb(err);
+            });
+    };
 };
 
 const methods = {
