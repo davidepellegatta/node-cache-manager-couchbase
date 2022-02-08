@@ -5,19 +5,13 @@
   "version": "2.1.0",
   "license": "MIT",
   "main": "dist/index.js",
-  "jest": {
-    "verbose": true,
-    "testTimeout": 10000,
-    "testRunner": "jest-circus/runner"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/davidepellegatta/node-cache-manager-couchbase.git"
   },
   "scripts": {
     "prepublish": "npm prune",
-    "test": "jest --detectOpenHandles --forceExit",
-    "test-cov": "jest --forceExit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test": "jasmine",
     "build": "rollup -c"
   },
   "dependencies": {
@@ -27,7 +21,7 @@
   "devDependencies": {
     "cache-manager": "^2.11.1",
     "coveralls": "^3.0.9",
-    "jest": "^27.5.0",
+    "jasmine": "^4.0.2",
     "rollup": "^1.31.0"
   }
 }

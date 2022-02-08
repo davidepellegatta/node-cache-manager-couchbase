@@ -91,7 +91,7 @@ const couchbaseStore = (...args) => {
 
         if (cb === undefined) {
             return new Promise(function (resolve, reject) {
-                couchbaseCollection.get(key, options, function (err, result) {
+                self.get(key, options, function (err, result) {
                     err ? reject(err) : resolve(result)
                 })
             })
@@ -100,10 +100,10 @@ const couchbaseStore = (...args) => {
         couchbaseCollection
             .get(key)
             .then((result) => {
-                return cb && cb(null, result.content);
+                return cb(null, result.content);
             })
             .catch((err) => {
-                return cb && cb(err);
+                return cb(err);
             });
     };
 

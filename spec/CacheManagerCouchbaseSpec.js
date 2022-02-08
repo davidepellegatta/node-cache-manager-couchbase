@@ -55,8 +55,6 @@ describe('set', () => {
         done();
       });
   });
-
-
 });
 
 describe('get', () => {
@@ -72,15 +70,5 @@ describe('get', () => {
 
     expect(getRes).toEqual('bar');
   });
-
-  /*
-  // this causes a segmentation fault
-  it('should reject promise on error', async () => {
-
-    try {
-      let result = await couchbaseCache.get('foo', () => new Error('Something went wrong'));
-    } catch (err) {
-      expect(err.message).toEqual('Something went wrong');
-    }
-  });*/
+  
 });
