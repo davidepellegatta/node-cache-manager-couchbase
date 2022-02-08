@@ -63,7 +63,7 @@ describe('get', () => {
     done();
   });
 
-  it('should resolve promise on success', async () => {
+  it('should resolve promise on success with the stored result', async () => {
 
     const setRes = await couchbaseCache.set('foo', 'bar');
     const getRes = await couchbaseCache.get('foo');
