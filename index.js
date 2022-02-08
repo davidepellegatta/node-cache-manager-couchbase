@@ -37,7 +37,8 @@ const couchbaseStore = (...args) => {
 
     let self = {
         name: 'couchbase',
-        options: globalOptions
+        options: globalOptions,
+        isCacheableValue
     };
 
     self.getClient = () => {
@@ -122,20 +123,20 @@ const couchbaseStore = (...args) => {
 
         if (cb === undefined) {
             return new Promise(function (resolve, reject) {
-                self.reset(key, options, function (err, result) {
+                self.reset(function (err, result) {
                     err ? reject(err) : resolve(result)
                 })
             })
         }
 
-        return couchbaseBucketManagerbucketMgr.flushBucket(storeArgs.bucket, cb);
+        return couchbaseBucketManager.flushBucket(globalOptions.bucket, cb);
     };
 
     self.keys = (pattern, cb) => {
 
         if (typeof pattern === 'function') {
             cb = pattern;
-            pattern = '*';
+            pattern = '';
         }
 
         if (cb === undefined) {
@@ -149,15 +150,15 @@ const couchbaseStore = (...args) => {
         let bucketReplacement = null;
 
         if (globalOptions.collection == null && globalOptions.collection === 'undefined') {
-            bucketReplacement = `\`${globalOptions.bucket}\`.\`_default\`.\`_default\``;
+            bucketReplacement = ` \`${globalOptions.bucket}\` b `;
         } else {
-            bucketReplacement = `\`${globalOptions.bucket}\`.\`${globalOptions.scope}\`.\`${globalOptions.collection}\``;
+            bucketReplacement = ` \`${globalOptions.bucket}\`.\`${globalOptions.scope}\`.\`${globalOptions.collection}\` b `;
         }
 
         const query = `
-            SELECT RAW meta().id
+            SELECT RAW meta(b).id
             FROM ${bucketReplacement} 
-            WHERE REGEXP_CONTAINS(META().id, $PATTERN)
+            WHERE REGEXP_CONTAINS(META(b).id, $PATTERN)
           `;
 
         const optionsQuery = {
@@ -165,7 +166,6 @@ const couchbaseStore = (...args) => {
                 PATTERN: pattern
             }
         }
-
 
         cluster.query(query, optionsQuery)
             .then((result) => {
@@ -194,6 +194,9 @@ const couchbaseStore = (...args) => {
                 return cb(null, secondsToExpiration);
             })
             .catch((err) => {
+                if(err.message == 'document not found') {
+                    return cb(null, -1);
+                }
                 return cb(err);
             });
     };
