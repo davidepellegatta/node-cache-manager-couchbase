@@ -9,11 +9,11 @@ var config = {
   connectionString: 'couchbase://127.0.0.1:8091',
   connectionOptions: {
     username: 'Administrator',
-    password: 'Administrator'
+    password: 'couchbase'
   },
   bucket: 'test-bucket',
-  scope: '_default',
-  collection: '_default',
+  //scope: '_default',
+  //collection: '_default',
   ttl: 2
 };
 

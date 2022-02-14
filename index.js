@@ -136,7 +136,7 @@ const couchbaseStore = (...args) => {
 
         if (typeof pattern === 'function') {
             cb = pattern;
-            pattern = '';
+            pattern = '.*';
         }
 
         if (cb === undefined) {
@@ -149,17 +149,17 @@ const couchbaseStore = (...args) => {
 
         let bucketReplacement = null;
 
-        if (globalOptions.collection == null && globalOptions.collection === 'undefined') {
+        if (globalOptions.collection == null || globalOptions.collection === 'undefined') {
             bucketReplacement = ` \`${globalOptions.bucket}\` b `;
         } else {
             bucketReplacement = ` \`${globalOptions.bucket}\`.\`${globalOptions.scope}\`.\`${globalOptions.collection}\` b `;
         }
 
-        const query = `
-            SELECT RAW meta(b).id
-            FROM ${bucketReplacement} 
-            WHERE REGEXP_CONTAINS(META(b).id, $PATTERN)
-          `;
+        if(pattern == null || pattern === 'undefined') {
+            pattern = '.*';
+        }
+
+        const query = `SELECT RAW meta(b).id FROM ${bucketReplacement} WHERE REGEXP_CONTAINS(META(b).id, $PATTERN)`;
 
         const optionsQuery = {
             parameters: {
