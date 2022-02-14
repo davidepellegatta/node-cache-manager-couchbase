@@ -19,3 +19,12 @@ Usage Examples
 --------------
 
 TBD
+
+Next Implementations
+--------------
+
+* Improve connection error handling
+* Improve documentation
+* Improve keys method
+* Verify ttl method compliancy
+* Upgrade Couchbase Cluster connection to a non-blocking mode (To Be Checked)
