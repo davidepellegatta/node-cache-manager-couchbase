@@ -3,7 +3,7 @@
   "author": "Davide Pellegatta <davide.pellegatta@gmail.com>",
   "description": "Couchbase store for node-cache-manager",
   "version": "0.1.0",
-  "license": "MIT",
+  "license": "Apache",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -11,8 +11,7 @@
   },
   "scripts": {
     "prepublish": "npm prune",
-    "test": "jasmine",
-    "build": "rollup -c"
+    "test": "jasmine"
   },
   "dependencies": {
     "bluebird": "^3.7.2",
@@ -21,8 +20,6 @@
   "devDependencies": {
     "cache-manager": "^2.11.1",
     "coveralls": "^3.0.9",
-    "jasmine": "^4.0.2",
-    "rollup": "^1.31.0",
-    "testcontainers": "^8.2.0"
+    "jasmine": "^4.0.2"
   }
 }
