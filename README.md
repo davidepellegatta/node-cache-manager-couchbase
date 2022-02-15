@@ -98,10 +98,9 @@ var config = {
   connectionString: 'couchbase://127.0.0.1:8091',
   connectionOptions: {
     username: 'Administrator',
-    password: 'couchbase'
+    password: 'your-secret-p@ssw0rd'
   },
-  collection: 'your-collection',
-  ttl: 2
+  bucket: 'your-bucket'
 };
 ```
 
@@ -112,7 +111,7 @@ var config = {
   connectionString: 'couchbase://127.0.0.1:8091',
   connectionOptions: {
     username: 'Administrator',
-    password: 'couchbase'
+    password: 'your-secret-p@ssw0rd'
   },
   bucket: 'your-bucket',
   scope: 'your-scope',
