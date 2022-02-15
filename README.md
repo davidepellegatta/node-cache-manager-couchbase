@@ -127,8 +127,9 @@ The configuration let you customise how the plugin connects to your couchbase cl
 
 ```js
 var config = {
-  connectionString: 'couchbase://127.0.0.1:8091',
+  connectionString: 'couchbases://node1.example.com,node2.example.com',
   connectionOptions: {
+    trustStorePath: '/path/to/ca/certificates.pem',
     username: 'Administrator',
     password: 'couchbase'
   },
@@ -138,19 +139,6 @@ var config = {
 
 `connectionString` let you provide one or multiple seed nodes and `connectionOptions` are passed right away to the underlying couchbase nodejs SDK so that you can use all options provided here on the [couchbase documentation](https://docs.couchbase.com/nodejs-sdk/current/howtos/managing-connections.html)
 
-Example for couchbase > 7.x 
-
-```js
-var config = {
-  connectionString: 'couchbase://127.0.0.1:8091',
-  connectionOptions: {
-    username: 'Administrator',
-    password: 'couchbase'
-  },
-  bucket: 'test-bucket',
-  ttl: 2
-};
-```
 
 Important! Setting up your bucket for `cache-manager` keys method
 --------------
