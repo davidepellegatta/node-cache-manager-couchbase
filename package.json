@@ -3,8 +3,8 @@
   "author": "Davide Pellegatta <davide.pellegatta@gmail.com>",
   "description": "Couchbase store for node-cache-manager",
   "version": "0.1.0",
-  "license": "Apache",
-  "main": "dist/index.js",
+  "license": "Apache-2.0",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/davidepellegatta/node-cache-manager-couchbase.git"
@@ -19,7 +19,6 @@
   },
   "devDependencies": {
     "cache-manager": "^2.11.1",
-    "coveralls": "^3.0.9",
     "jasmine": "^4.0.2"
   }
 }
