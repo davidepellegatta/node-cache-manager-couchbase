@@ -100,6 +100,20 @@ var config = {
     username: 'Administrator',
     password: 'couchbase'
   },
+  collection: 'your-collection',
+  ttl: 2
+};
+```
+
+Example for couchbase  >7.x:
+
+```js
+var config = {
+  connectionString: 'couchbase://127.0.0.1:8091',
+  connectionOptions: {
+    username: 'Administrator',
+    password: 'couchbase'
+  },
   bucket: 'your-bucket',
   scope: 'your-scope',
   collection: 'your-collection',
